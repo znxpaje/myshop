@@ -1,1 +1,9 @@
-[]
+[
+  {
+    "id": 1,
+    "name": "عوادي زكرياء",
+    "price": 50,
+    "desc": "التوصيل مجاني",
+    "image": "https://files.catbox.moe/it2n37.jpg"
+  }
+]
