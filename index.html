@@ -1,162 +1,73 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZynoXx Store</title>
-  <script src="https://cdn.tailwindcss.com"></script>
-  <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
-  <style>
-    body { font-family: 'Cairo', sans-serif; background: #f8f9fc; }
-    .purple { background: linear-gradient(135deg, #c9a9ff, #e0c3ff); }
-    .img:hover { transform: scale(1.04); transition: 0.3s; }
-    .selectt { border: 1px solid #ddd; border-radius: 12px; padding: 14px; font-size: 16px; background: white; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ZynoXx ꜝあ - Urban Style</title>
+    <style>
+        body { font-family: 'Arial', sans-serif; margin: 0; padding: 0; background: #000; color: #fff; }
+        header { background: rgba(0,0,0,0.8); padding: 10px 20px; display: flex; justify-content: space-between; align-items: center; position: sticky; top: 0; z-index: 10; }
+        .logo { font-size: 24px; font-weight: bold; background: linear-gradient(to right, #000, #333); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
+        .logo .special { color: #00ff88; font-style: italic; } /* Neon للـ ꜝあ */
+        nav { display: flex; gap: 20px; }
+        nav a { color: #fff; text-decoration: none; }
+        .delivery { text-align: center; padding: 20px; background: #111; }
+        .hero { position: relative; height: 400px; background: #000 url('https://files.catbox.moe/ahw6gj.jpg') center/cover; opacity: 0.8; display: flex; align-items: center; justify-content: center; }
+        .hero::before { content: ''; position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); }
+        .hero h1 { position: relative; z-index: 1; font-size: 48px; text-align: center; }
+        .welcome { text-align: center; padding: 20px; background: #222; }
+        .products-section { padding: 40px 20px; max-width: 1200px; margin: auto; }
+        .products-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 20px; }
+        .product-card { background: #333; padding: 15px; border-radius: 10px; text-align: center; }
+        .product-card img { width: 100%; height: 200px; object-fit: cover; border-radius: 5px; }
+        .product-title { font-size: 18px; margin: 10px 0; }
+        .price { color: #00ff88; font-size: 20px; }
+        footer { background: #111; text-align: center; padding: 20px; }
+        @media (max-width: 768px) { .hero h1 { font-size: 32px; } }
+    </style>
 </head>
-<body x-data="app()" x-init="load()" class="pb-20">
-
-  <!-- بياناتك كاملة -->
-  <script>
-    const BOT_TOKEN     = "7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk";
-    const CHAT_ID       = "6497254308";
-    const GITHUB_TOKEN  = "ghp_KlP9vXz8mNqRtY7uJ5sL2wF6cH3dA1eF8gH9";
-    const REPO          = "znxpaje/myshop";
-    const BRANCH        = "main";
-    const PRODUCTS_FILE = "products.json";
-  </script>
-
-  <div class="max-w-lg mx-auto p-4">
-
-    <!-- الصورة الرئيسية + الثلاث صغيرة -->
-    <template x-if="p">
-      <div class="bg-white rounded-3xl overflow-hidden shadow-lg">
-        <img :src="img" class="w-full h-96 object-cover img">
-        <div class="flex justify-center gap-3 p-3 bg-gray-50">
-          <template x-for="t in thumbs">
-            <img @click="img = t" :src="t" class="w-20 h-20 rounded-lg border-4" :class="img===t?'border-purple-500':'border-gray-300'">
-          </template>
-        </div>
-      </div>
-
-      <!-- الاسم -->
-      <div class="text-center my-6">
-        <h1 class="text-3xl font-bold text-purple-700" x-text="en"></h1>
-        <h2 class="text-xl mt-1" x-text="ar"></h2>
-      </div>
-
-      <!-- السعر -->
-      <div class="purple text-white text-center py-4 rounded-2xl text-2xl font-bold">
-        <span class="line-through opacity-75" x-text="old+' ع.م'"></span>
-        <span x-text="price + ' ~ 2500'"></span>
-      </div>
-
-      <!-- الخيارات -->
-      <div class="bg-white rounded-2xl p-5 mt-6 space-y-5">
-        <div>
-          <label class="block mb-2 text-gray-700">Couleur</label>
-          <select x-model="color" class="selectt w-full">
-            <option value="">اختر اللون</option>
-            <template x-for="c in colors"><option x-text="c"></option></template>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-2 text-gray-700">Taille</label>
-          <select x-model="size" class="selectt w-full">
-            <option value="">اختر الحجم</option>
-            <template x-for="s in sizes"><option x-text="s"></option></template>
-          </select>
-        </div>
-        <div>
-          <label class="block mb-2 text-gray-700">Longueur</label>
-          <select x-model="length" class="selectt w-full">
-            <option value="">اختر الطول</option>
-            <template x-for="l in lengths"><option x-text="l"></option></template>
-          </select>
-        </div>
-      </div>
-
-      <!-- الوصف مع النجمات والـ ✓ -->
-      <div class="bg-white rounded-2xl p-5 mt-6">
-        <ul class="space-y-3 text-right">
-          <li class="flex items-center"><i class="fas fa-star text-yellow-500 ml-3"></i> <span x-text="ar"></span></li>
-          <template x-for="f in features">
-            <li class="flex items-center"><i class="fas fa-check text-gray-500 ml-3"></i> <span x-text="f"></span></li>
-          </template>
-          <li class="flex items-center"><i class="fas fa-star text-yellow-500 ml-3"></i> أفضل جودة وسعر في السوق!</li>
-        </ul>
-      </div>
-
-      <!-- زر الإضافة -->
-      <button @click="add()" class="purple w-full mt-8 py-5 rounded-2xl text-white text-xl font-bold flex justify-center items-center">
-        <i class="fas fa-shopping-bag ml-3"></i> أضف للسلة
-      </button>
-    </template>
-
-    <!-- لو مفيش منتجات -->
-    <div x-show="!p" class="text-center py-20 text-gray-500">
-      <i class="fas fa-box-open text-6xl mb-4"></i>
-      <p class="text-xl">أضف منتج من البوت ليظهر هنا</p>
+<body>
+    <header>
+        <div class="logo">ZynoXx <span class="special">ꜝあ</span></div>
+        <nav>
+            <a href="#products">Our Products</a>
+            <a href="/cart">Cart (0)</a>
+        </nav>
+    </header>
+    
+    <div class="delivery">
+        <h2>Delivery to 58 Wilayas 🇩🇿🚚</h2>
     </div>
-  </div>
-
-  <!-- Checkout -->
-  <div x-show="checkout" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" @click="checkout=false">
-    <div @click.stop class="bg-white rounded-3xl p-6 max-w-md w-full mx-4">
-      <h2 class="text-2xl font-bold mb-6">إتمام الطلب</h2>
-      <input x-model="name" placeholder="الاسم الكامل" class="w-full p-4 border rounded-xl mb-4">
-      <input x-model="phone" placeholder="رقم الهاتف" class="w-full p-4 border rounded-xl mb-4">
-      <input x-model="wilaya" placeholder="الولاية" class="w-full p-4 border rounded-xl mb-4">
-      <textarea x-model="address" placeholder="العنوان بالتفصيل" rows="3" class="w-full p-4 border rounded-xl mb-6"></textarea>
-      <button @click="send()" class="purple w-full py-4 rounded-xl text-white font-bold">إرسال الطلب عبر التليجرام</button>
+    
+    <div class="hero">
+        <h1>Welcome to ZynoXx – Your Urban Style Hub</h1>
     </div>
-  </div>
+    
+    <section class="products-section" id="products">
+        <h2 style="text-align: center;">Featured Products</h2>
+        <div class="products-grid" id="featured-products"></div>
+    </section>
+    
+    <footer>
+        <p>&copy; 2025 ZynoXx ꜝあ. All Rights Reserved.</p>
+    </footer>
 
-<script>
-function app() {
-  return {
-    p:null, img:"", thumbs:[], en:"", ar:"", price:0, old:0, colors:[], sizes:[], lengths:[], features:[],
-    color:"", size:"", length:"", name:"", phone:"", wilaya:"", address:"", checkout:false,
-
-    async load() {
-      try {
-        const r = await fetch('products.json?t='+Date.now());
-        const d = await r.json();
-        if (d[0]) {
-          this.p = d[0];
-          this.img = this.p.image;
-          this.thumbs = this.p.thumbs || [];
-          this.en = this.p.en;
-          this.ar = this.p.ar;
-          this.price = this.p.price;
-          this.old = this.p.old;
-          this.colors = this.p.colors || [];
-          this.sizes = this.p.sizes || [];
-          this.lengths = this.p.lengths || [];
-          this.features = this.p.features || [];
-        }
-      } catch(e) {}
-    },
-
-    add() {
-      if (!this.color || !this.size) return alert("اختر اللون والحجم");
-      this.checkout = true;
-    },
-
-    async send() {
-      const text = `طلب جديد!\nالمنتج: \( {this.ar}\nاللون: \){this.color}\nالحجم: \( {this.size}\nالطول: \){this.length}\nالسعر: \( {this.price} دج\n\nالاسم: \){this.name}\nالهاتف: \( {this.phone}\nالولاية: \){this.wilaya}\nالعنوان: ${this.address}`;
-      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-        method: "POST",
-        headers: {"Content-Type": "application/json"},
-        body: JSON.stringify({chat_id: CHAT_ID, text: text})
-      });
-      alert("تم الإرسال بنجاح!");
-      this.checkout = false;
-      this.name = this.phone = this.wilaya = this.address = "";
-    }
-  }
-}
-</script>
+    <script>
+        // تحميل المنتجات من JSON (افتراضياً، هيحمل من products.json عبر fetch)
+        fetch('products.json').then(r => r.json()).then(data => {
+            const grid = document.getElementById('featured-products');
+            data.slice(0, 4).forEach(product => { // أول 4 منتجات
+                const card = document.createElement('div');
+                card.className = 'product-card';
+                card.innerHTML = `
+                    <img src="\( {product.image}" alt=" \){product.title}">
+                    <h3 class="product-title">${product.title}</h3>
+                    <p class="price">DA \( {product.price} <span style="text-decoration: line-through; color: #999;">DA \){product.oldPrice || ''}</span></p>
+                    <a href="product.html?id=${product.id}" style="background: #00ff88; color: #000; padding: 10px; text-decoration: none; border-radius: 5px;">View Details</a>
+                `;
+                grid.appendChild(card);
+            });
+        });
+    </script>
 </body>
 </html>
