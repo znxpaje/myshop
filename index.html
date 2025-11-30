@@ -1,35 +1,51 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" class="scroll-smooth">
+<html lang="ar" dir="rtl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ZynoXx Store</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ZynoXx Store - إصدارات حصرية</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Cairo', sans-serif; background: #000; color: #fff; }
-    .gradient-text { background: linear-gradient(90deg, #ff00c8, #ffd000); -webkit-background-clip: text; color: transparent; }
+    body { font-family: 'Inter', sans-serif; background: #fff; color: #000; }
+    .hover-zoom { transition: transform 0.3s ease; }
+    .hover-zoom:hover { transform: scale(1.05); }
   </style>
 </head>
-<body x-data="shop()" x-init="loadProducts(); setInterval(loadProducts, 7000)" class="min-h-screen">
+<body x-data="store()" x-init="loadProducts()" class="min-h-screen">
 
-  <!-- اللوغو في الوسط فقط -->
-  <div class="fixed top-8 left-0 right-0 z-50 text-center pointer-events-none">
-    <h1 class="text-5xl md:text-7xl font-black gradient-text drop-shadow-2xl">ZynoXx</h1>
-  </div>
+  <!-- Header بسيط -->
+  <header class="bg-white border-b border-gray-200">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-2xl font-bold">ZynoXx</h1>
+      <nav class="space-x-6">
+        <a href="#" class="text-gray-600 hover:text-black">الرئيسية</a>
+        <a href="#" class="text-gray-600 hover:text-black">المنتجات</a>
+        <a href="#" class="text-gray-600 hover:text-black">اتصل بنا</a>
+      </nav>
+    </div>
+  </header>
 
-  <!-- المنتجات -->
-  <main class="pt-32 pb-24 px-4">
-    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
-      <template x-for="p in products" :key="p.id">
-        <div @click="openProduct(p)" class="group cursor-pointer">
-          <div class="relative overflow-hidden rounded-2xl aspect-square">
-            <img :src="p.image" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
-            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
-            <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition">
-              <h3 class="text-2xl font-bold" x-text="p.name"></h3>
-              <p class="text-3xl font-black gradient-text" x-text="p.price.toLocaleString() + ' DA'"></p>
+  <!-- قسم المنتجات -->
+  <main class="max-w-7xl mx-auto px-4 py-12">
+    <div class="text-center mb-12">
+      <h2 class="text-4xl font-bold mb-4">إصدارات حصرية 2026</h2>
+      <p class="text-gray-600">مجموعة محدودة من التصاميم الفاخرة</p>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <template x-for="product in products" :key="product.id">
+        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover-zoom">
+          <img :src="product.image" :alt="product.name" class="w-full h-64 object-cover">
+          <div class="p-6">
+            <h3 class="text-xl font-semibold mb-2" x-text="product.name"></h3>
+            <p class="text-gray-600 mb-4" x-text="product.desc"></p>
+            <div class="flex justify-between items-center">
+              <span class="text-2xl font-bold" x-text="product.price + ' DA'"></span>
+              <button @click="addToCart(product)" class="bg-black text-white px-6 py-3 rounded hover:bg-gray-800">
+                أضف للسلة
+              </button>
             </div>
           </div>
         </div>
@@ -37,68 +53,71 @@
     </div>
   </main>
 
-  <!-- نافذة المنتج + Checkout -->
-  <div x-show="selected" x-transition class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4" @click.self="selected = null">
-    <div class="bg-zinc-900 rounded-3xl max-w-md w-full overflow-hidden">
-      <img :src="selected.image" class="w-full h-96 object-cover">
-      <div class="p-6">
-        <h2 class="text-3xl font-bold mb-2" x-text="selected.name"></h2>
-        <p class="text-4xl font-black gradient-text mb-8" x-text="selected.price.toLocaleString() + ' DA'"></p>
-        
-        <form @submit.prevent="sendOrder" class="space-y-5">
-          <input x-model="form.name" placeholder="الاسم الكامل" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
-          <input x-model="form.phone" placeholder="رقم الهاتف" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
-          <select x-model="form.wilaya" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
-            <option value="" disabled>اختر الولاية</option>
-            <option>الجزائر</option>
-            <option>وهران</option>
-            <option>قسنطينة</option>
-            <!-- أضف باقي الولايات إذا تبي -->
-          </select>
-          <input x-model="form.address" placeholder="العنوان بالتفصيل" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
-          
-          <button type="submit" class="w-full bg-gradient-to-r from-pink-600 to-yellow-500 py-5 rounded-xl text-xl font-bold">
-            أرسل الطلب عبر تليجرام
-          </button>
-        </form>
-      </div>
+  <!-- Footer بسيط -->
+  <footer class="bg-gray-100 py-8 text-center text-gray-600">
+    <p>&copy; 2026 ZynoXx. جميع الحقوق محفوظة.</p>
+  </footer>
+
+  <!-- سلة الطلبات -->
+  <div x-show="cartOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+    <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4">سلة التسوق</h2>
+      <template x-for="item in cart">
+        <div class="flex justify-between mb-4">
+          <span x-text="item.name"></span>
+          <span x-text="item.price + ' DA'"></span>
+        </div>
+      </template>
+      <p class="text-xl font-bold mb-4">الإجمالي: <span x-text="total + ' DA'"></span></p>
+      <button @click="checkoutOpen = true" class="w-full bg-black text-white py-3 rounded">إتمام الطلب</button>
+    </div>
+  </div>
+
+  <!-- Checkout زي Shopify -->
+  <div x-show="checkoutOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
+    <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4">إتمام الطلب</h2>
+      <form @submit.prevent="sendOrder">
+        <input x-model="customer.name" placeholder="الاسم" required class="w-full p-3 border rounded mb-4">
+        <input x-model="customer.phone" placeholder="الهاتف" required class="w-full p-3 border rounded mb-4">
+        <input x-model="customer.address" placeholder="العنوان" required class="w-full p-3 border rounded mb-4">
+        <button type="submit" class="w-full bg-black text-white py-3 rounded">إرسال عبر تليجرام</button>
+      </form>
     </div>
   </div>
 
 <script>
-function shop() {
+function store() {
   return {
-    products: [], selected: null,
-    form: { name: '', phone: '', wilaya: '', address: '' },
+    products: [],
+    cart: [],
+    cartOpen: false,
+    checkoutOpen: false,
+    customer: { name: '', phone: '', address: '' },
 
     async loadProducts() {
-      try {
-        const r = await fetch('products.json?t=' + Date.now());
-        this.products = await r.json();
-      } catch(e) {}
+      const res = await fetch('products.json?t=' + Date.now());
+      this.products = await res.json();
     },
 
-    openProduct(p) { this.selected = p; },
+    addToCart(product) {
+      this.cart.push(product);
+      this.cartOpen = true;
+    },
+
+    total: 0,
 
     async sendOrder() {
-      const text = `طلب جديد - ZynoXx Store\n\n` +
-        `المنتج: ${this.selected.name}\n` +
-        `السعر: ${this.selected.price.toLocaleString()} DA\n\n` +
-        `الاسم: ${this.form.name}\n` +
-        `الهاتف: ${this.form.phone}\n` +
-        `الولاية: ${this.form.wilaya}\n` +
-        `العنوان: ${this.form.address}\n\n` +
-        `التاريخ: ${new Date().toLocaleString('ar-DZ')}`;
-
-      await fetch(`https://api.telegram.org/bot7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk/sendMessage`, {
+      const orderText = `طلب جديد!\n\( {this.cart.map(i => ` \){i.name} - \( {i.price} DA`).join('\n')}\nإجمالي: \){this.cart.reduce((s, i) => s + i.price, 0)} DA\nالاسم: \( {this.customer.name}\nالهاتف: \){this.customer.phone}\nالعنوان: ${this.customer.address}`;
+      
+      await fetch('https://api.telegram.org/bot7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk/sendMessage', {
         method: 'POST',
-        headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ chat_id: 6497254308, text })
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ chat_id: 6497254308, text: orderText })
       });
 
-      alert("تم إرسال طلبك بنجاح! سنتواصل معك قريبًا");
-      this.selected = null;
-      this.form = { name: '', phone: '', wilaya: '', address: '' };
+      alert('تم الإرسال!');
+      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', address: '' };
     }
   }
 }
