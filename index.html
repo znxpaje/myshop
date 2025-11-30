@@ -3,121 +3,221 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZynoXx Store - إصدارات حصرية</title>
+  <title>ZynoXx Store - منتجات حصرية</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> <!-- أيقونات كاملة، ما في فارغات -->
   <style>
-    body { font-family: 'Inter', sans-serif; background: #fff; color: #000; }
-    .hover-zoom { transition: transform 0.3s ease; }
-    .hover-zoom:hover { transform: scale(1.05); }
+    body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; }
+    .product-image { transition: transform 0.3s ease; }
+    .product-image:hover { transform: scale(1.05); }
+    .variant-btn { transition: background-color 0.2s; }
+    .variant-btn:hover { background-color: #f3f4f6 !important; }
+    .price { font-size: 2rem; font-weight: 700; color: #000; }
   </style>
 </head>
-<body x-data="store()" x-init="loadProducts()" class="min-h-screen">
+<body x-data="productStore()" x-init="loadProduct()" class="min-h-screen">
 
-  <!-- Header بسيط -->
-  <header class="bg-white border-b border-gray-200">
-    <div class="max-w-7xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-2xl font-bold">ZynoXx</h1>
-      <nav class="space-x-6">
-        <a href="#" class="text-gray-600 hover:text-black">الرئيسية</a>
-        <a href="#" class="text-gray-600 hover:text-black">المنتجات</a>
-        <a href="#" class="text-gray-600 hover:text-black">اتصل بنا</a>
+  <!-- Header بسيط مطابق لـ Shopify -->
+  <header class="bg-white border-b border-gray-200 shadow-sm">
+    <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
+      <h1 class="text-xl font-bold text-black"><i class="fas fa-store mr-2"></i>ZynoXx</h1>
+      <nav class="hidden md:flex space-x-8">
+        <a href="#" class="text-gray-600 hover:text-black"><i class="fas fa-home mr-1"></i>الرئيسية</a>
+        <a href="#" class="text-gray-600 hover:text-black"><i class="fas fa-box mr-1"></i>المنتجات</a>
+        <a href="#" class="text-gray-600 hover:text-black"><i class="fas fa-phone mr-1"></i>اتصل بنا</a>
       </nav>
+      <button @click="cartOpen = true" class="text-gray-600 hover:text-black relative">
+        <i class="fas fa-shopping-cart text-2xl"></i>
+        <span x-show="cart.length > 0" class="absolute -top-2 -right-2 bg-black text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" x-text="cart.length"></span>
+      </button>
     </div>
   </header>
 
-  <!-- قسم المنتجات -->
-  <main class="max-w-7xl mx-auto px-4 py-12">
-    <div class="text-center mb-12">
-      <h2 class="text-4xl font-bold mb-4">إصدارات حصرية 2026</h2>
-      <p class="text-gray-600">مجموعة محدودة من التصاميم الفاخرة</p>
-    </div>
+  <!-- Main Product Section - مطابقة للرابط -->
+  <main class="max-w-6xl mx-auto px-4 py-12">
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+      
+      <!-- Product Images - كبيرة مع zoom -->
+      <div class="space-y-4">
+        <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
+          <img :src="currentImage" :alt="product.name" class="w-full h-full object-cover product-image cursor-zoom-in">
+        </div>
+        <!-- Thumbnails -->
+        <template x-if="product.thumbnails">
+          <div class="flex space-x-2">
+            <template x-for="thumb in product.thumbnails" :key="thumb">
+              <img @click="currentImage = thumb" :src="thumb" class="w-20 h-20 object-cover rounded cursor-pointer border-2" :class="{ 'border-black': currentImage === thumb }">
+            </template>
+          </div>
+        </template>
+      </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-      <template x-for="product in products" :key="product.id">
-        <div class="bg-white border border-gray-200 rounded-lg overflow-hidden hover-zoom">
-          <img :src="product.image" :alt="product.name" class="w-full h-64 object-cover">
-          <div class="p-6">
-            <h3 class="text-xl font-semibold mb-2" x-text="product.name"></h3>
-            <p class="text-gray-600 mb-4" x-text="product.desc"></p>
-            <div class="flex justify-between items-center">
-              <span class="text-2xl font-bold" x-text="product.price + ' DA'"></span>
-              <button @click="addToCart(product)" class="bg-black text-white px-6 py-3 rounded hover:bg-gray-800">
-                أضف للسلة
-              </button>
+      <!-- Product Details -->
+      <div>
+        <h1 class="text-3xl font-bold mb-4" x-text="product.name"></h1>
+        <div class="flex items-center mb-6">
+          <span class="price mr-4" x-text="product.price + ' DA'"></span>
+          <span class="text-sm text-gray-500 line-through" x-show="product.originalPrice" x-text="product.originalPrice + ' DA'"></span>
+          <div class="text-green-600 text-sm font-semibold" x-show="product.discount"><i class="fas fa-tag mr-1"></i>خصم <span x-text="product.discount"></span>%</div>
+        </div>
+
+        <!-- Description -->
+        <div class="mb-6">
+          <p class="text-gray-600 mb-4" x-text="product.desc"></p>
+          <ul class="space-y-2 text-sm text-gray-600">
+            <template x-for="feature in product.features" :key="feature">
+              <li><i class="fas fa-check text-green-500 mr-2"></i><span x-text="feature"></span></li>
+            </template>
+          </ul>
+        </div>
+
+        <!-- Variants (Colors/Sizes) -->
+        <template x-if="product.variants">
+          <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">اللون:</label>
+            <div class="flex space-x-2">
+              <template x-for="variant in product.variants.colors" :key="variant">
+                <button @click="selectVariant('color', variant)" class="variant-btn w-10 h-10 rounded-full border-2" :class="{ 'border-black bg-current': selectedVariant.color === variant }" :style="'background-color: ' + variant"></button>
+              </template>
             </div>
           </div>
+          <div class="mb-6">
+            <label class="block text-sm font-medium mb-2">الحجم:</label>
+            <select @change="selectVariant('size', $event.target.value)" class="w-full p-3 border rounded-lg">
+              <template x-for="size in product.variants.sizes" :key="size">
+                <option :value="size" x-text="size"></option>
+              </template>
+            </select>
+          </div>
+        </template>
+
+        <!-- Add to Cart Buttons -->
+        <div class="space-y-3 mb-8">
+          <button @click="addToCart()" class="w-full bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 flex items-center justify-center">
+            <i class="fas fa-shopping-cart mr-2"></i>أضف للسلة
+          </button>
+          <button @click="buyNow()" class="w-full bg-blue-600 text-white py-4 rounded-lg font-semibold hover:bg-blue-700 flex items-center justify-center">
+            <i class="fas fa-bolt mr-2"></i>اشترِ الآن
+          </button>
         </div>
-      </template>
+
+        <!-- Shipping Info -->
+        <div class="bg-gray-50 p-4 rounded-lg">
+          <h3 class="font-semibold mb-2"><i class="fas fa-truck mr-2"></i>الشحن</h3>
+          <p class="text-sm text-gray-600">شحن مجاني للطلبات فوق 5000 DA. التوصيل في 3-5 أيام.</p>
+        </div>
+      </div>
     </div>
   </main>
 
-  <!-- Footer بسيط -->
-  <footer class="bg-gray-100 py-8 text-center text-gray-600">
-    <p>&copy; 2026 ZynoXx. جميع الحقوق محفوظة.</p>
-  </footer>
-
-  <!-- سلة الطلبات -->
-  <div x-show="cartOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
-    <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-      <h2 class="text-2xl font-bold mb-4">سلة التسوق</h2>
+  <!-- Cart Modal -->
+  <div x-show="cartOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-transition>
+    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4 max-h-96 overflow-y-auto">
+      <h2 class="text-2xl font-bold mb-4"><i class="fas fa-shopping-cart mr-2"></i>سلة التسوق</h2>
       <template x-for="item in cart">
-        <div class="flex justify-between mb-4">
+        <div class="flex justify-between items-center py-2 border-b">
           <span x-text="item.name"></span>
           <span x-text="item.price + ' DA'"></span>
         </div>
       </template>
-      <p class="text-xl font-bold mb-4">الإجمالي: <span x-text="total + ' DA'"></span></p>
-      <button @click="checkoutOpen = true" class="w-full bg-black text-white py-3 rounded">إتمام الطلب</button>
+      <p class="text-xl font-bold mt-4">الإجمالي: <span x-text="total + ' DA'"></span></p>
+      <button @click="checkoutOpen = true" class="w-full bg-black text-white py-3 rounded mt-4">إتمام الطلب</button>
     </div>
   </div>
 
-  <!-- Checkout زي Shopify -->
-  <div x-show="checkoutOpen" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50" x-transition>
-    <div class="bg-white p-8 rounded-lg max-w-md w-full mx-4">
-      <h2 class="text-2xl font-bold mb-4">إتمام الطلب</h2>
+  <!-- Checkout Modal -->
+  <div x-show="checkoutOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-transition>
+    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-4"><i class="fas fa-credit-card mr-2"></i>إتمام الطلب</h2>
       <form @submit.prevent="sendOrder">
-        <input x-model="customer.name" placeholder="الاسم" required class="w-full p-3 border rounded mb-4">
-        <input x-model="customer.phone" placeholder="الهاتف" required class="w-full p-3 border rounded mb-4">
-        <input x-model="customer.address" placeholder="العنوان" required class="w-full p-3 border rounded mb-4">
-        <button type="submit" class="w-full bg-black text-white py-3 rounded">إرسال عبر تليجرام</button>
+        <input x-model="customer.name" placeholder="الاسم الكامل" required class="w-full p-3 border rounded mb-4">
+        <input x-model="customer.phone" placeholder="رقم الهاتف" required class="w-full p-3 border rounded mb-4">
+        <select x-model="customer.wilaya" required class="w-full p-3 border rounded mb-4">
+          <option value="">اختر الولاية</option>
+          <option>الجزائر</option>
+          <option>وهران</option>
+          <option>قسنطينة</option>
+          <option>عنابة</option>
+          <option>باتنة</option>
+          <!-- أضف المزيد إذا تبي -->
+        </select>
+        <textarea x-model="customer.address" placeholder="العنوان بالتفصيل" required rows="3" class="w-full p-3 border rounded mb-4"></textarea>
+        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded font-semibold">إرسال عبر تليجرام <i class="fas fa-paper-plane ml-2"></i></button>
       </form>
     </div>
   </div>
 
+  <!-- Footer -->
+  <footer class="bg-gray-100 py-8 text-center text-gray-600 mt-12">
+    <p>&copy; 2026 ZynoXx. جميع الحقوق محفوظة. <i class="fas fa-heart text-red-500 ml-1"></i></p>
+  </footer>
+
 <script>
-function store() {
+function productStore() {
   return {
-    products: [],
+    product: {},
+    currentImage: '',
     cart: [],
     cartOpen: false,
     checkoutOpen: false,
-    customer: { name: '', phone: '', address: '' },
+    selectedVariant: { color: '', size: '' },
+    customer: { name: '', phone: '', wilaya: '', address: '' },
 
-    async loadProducts() {
-      const res = await fetch('products.json?t=' + Date.now());
-      this.products = await res.json();
+    async loadProduct() {
+      try {
+        const res = await fetch('products.json?t=' + Date.now());
+        const data = await res.json();
+        this.product = data[0] || {}; // افتراضي أول منتج
+        this.currentImage = this.product.image || '';
+      } catch(e) {
+        console.error(e);
+      }
     },
 
-    addToCart(product) {
-      this.cart.push(product);
-      this.cartOpen = true;
+    selectVariant(type, value) {
+      this.selectedVariant[type] = value;
     },
 
-    total: 0,
+    addToCart() {
+      if (this.selectedVariant.color || this.selectedVariant.size) {
+        const item = { ...this.product, variant: `\( {this.selectedVariant.color || ''} - \){this.selectedVariant.size || ''}` };
+        this.cart.push(item);
+        this.cartOpen = true;
+      } else {
+        alert('اختر اللون أو الحجم أولاً');
+      }
+    },
+
+    buyNow() {
+      this.addToCart();
+      this.checkoutOpen = true;
+    },
+
+    get total() {
+      return this.cart.reduce((sum, item) => sum + item.price, 0);
+    },
 
     async sendOrder() {
-      const orderText = `طلب جديد!\n\( {this.cart.map(i => ` \){i.name} - \( {i.price} DA`).join('\n')}\nإجمالي: \){this.cart.reduce((s, i) => s + i.price, 0)} DA\nالاسم: \( {this.customer.name}\nالهاتف: \){this.customer.phone}\nالعنوان: ${this.customer.address}`;
-      
+      const orderText = `طلب جديد من ZynoXx Store!\n\n` +
+        `المنتج: ${this.product.name}\n` +
+        `اللون/الحجم: \( {this.selectedVariant.color || ''} - \){this.selectedVariant.size || ''}\n` +
+        `السعر: ${this.product.price} DA\n\n` +
+        `الاسم: ${this.customer.name}\n` +
+        `الهاتف: ${this.customer.phone}\n` +
+        `الولاية: ${this.customer.wilaya}\n` +
+        `العنوان: ${this.customer.address}\n\n` +
+        `التاريخ: ${new Date().toLocaleString('ar-DZ')}`;
+
       await fetch('https://api.telegram.org/bot7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk/sendMessage', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ chat_id: 6497254308, text: orderText })
       });
 
-      alert('تم الإرسال!');
-      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', address: '' };
+      alert('تم إرسال الطلب بنجاح! سنتواصل معك قريبًا.');
+      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', wilaya: '', address: '' };
     }
   }
 }
