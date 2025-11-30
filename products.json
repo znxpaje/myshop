@@ -19,5 +19,12 @@
     "price": 3500,
     "desc": "إصدار محدود 30 قطعة",
     "image": "https://imgg.io/image/VVR3aO"
+  },
+  {
+    "id": 4,
+    "name": "عطر VIP",
+    "price": 3500,
+    "desc": "إصدار محدود 30 قطعة",
+    "image": "https://files.catbox.moe/9zrn5c.jpg"
   }
 ]
