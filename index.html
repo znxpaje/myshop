@@ -3,53 +3,33 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>ZynoXx Store - متجر حصري 2026</title>
+  <title>ZynoXx Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
-  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;600;800;900&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@700;900&display=swap" rel="stylesheet">
   <style>
-    body { font-family: 'Cairo', sans-serif; background: #0a0a0a; color: #f0f0f0; }
-    .glass { background: rgba(30,30,50,0.4); backdrop-filter: blur(16px); border: 1px solid rgba(100,100,255,0.1); }
-    .gradient-text { background: linear-gradient(90deg, #ffd700, #ff00aa); -webkit-background-clip: text; color: transparent; }
+    body { font-family: 'Cairo', sans-serif; background: #000; color: #fff; }
+    .gradient-text { background: linear-gradient(90deg, #ff00c8, #ffd000); -webkit-background-clip: text; color: transparent; }
   </style>
 </head>
-<body x-data="shop()" x-init="loadProducts(); setInterval(loadProducts, 8000)" class="min-h-screen">
+<body x-data="shop()" x-init="loadProducts(); setInterval(loadProducts, 7000)" class="min-h-screen">
 
-  <header class="fixed top-0 w-full z-50 glass border-b border-purple-900/30">
-    <div class="container mx-auto px-6 py-5 flex justify-between items-center">
-      <h1 class="text-4xl font-black gradient-text">ZynoXx</h1>
-      <button @click="cartOpen = true" class="relative p-3 glass rounded-full hover:scale-110 transition">
-        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 3h2l.4 2M7 13h10l4-8H5.4M7 13L5.4 5M7 13l-2.293 2.293c-.63.63-.184 1.707.707 1.707H17m0 0a2 2 0 100 4 2 2 0 000-4zm-8 2a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-        <span x-show="cart.length" class="absolute -top-1 -left-1 bg-pink-600 text-white text-xs rounded-full w-6 h-6 flex items-center justify-center" x-text="cart.length"></span>
-      </button>
-    </div>
-  </header>
+  <!-- اللوغو في الوسط فقط -->
+  <div class="fixed top-8 left-0 right-0 z-50 text-center pointer-events-none">
+    <h1 class="text-5xl md:text-7xl font-black gradient-text drop-shadow-2xl">ZynoXx</h1>
+  </div>
 
-  <main class="pt-28 pb-20 px-4">
-    <div class="text-center mb-16">
-      <h2 class="text-6xl font-black mb-4">إصدارات حصرية 2026</h2>
-      <p class="text-2xl text-purple-300">فقط 50 قطعة من كل تصميم في العالم</p>
-    </div>
-
-    <div x-show="loading" class="text-center py-20">
-      <div class="inline-block animate-spin rounded-full h-16 w-16 border-t-4 border-pink-600"></div>
-    </div>
-
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+  <!-- المنتجات -->
+  <main class="pt-32 pb-24 px-4">
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 max-w-5xl mx-auto">
       <template x-for="p in products" :key="p.id">
-        <div class="glass rounded-3xl overflow-hidden group hover:-translate-y-4 transition duration-500">
-          <div class="relative overflow-hidden">
-            <img :src="p.image" class="w-full h-96 object-cover group-hover:scale-110 transition duration-700">
-            <div class="absolute top-4 left-4 bg-black/70 px-4 py-2 rounded-full text-xs">فقط <span x-text="50 - (p.sold || 0)"></span> متبقية</div>
-          </div>
-          <div class="p-8">
-            <h3 class="text-3xl font-bold mb-2" x-text="p.name"></h3>
-            <p class="text-gray-400 mb-6" x-text="p.desc"></p>
-            <div class="flex justify-between items-center">
-              <span class="text-4xl font-black gradient-text" x-text="p.price.toLocaleString() + ' ريال'"></span>
-              <button @click="addToCart(p)" class="bg-gradient-to-r from-purple-600 to-pink-600 px-8 py-4 rounded-full font-bold text-lg hover:shadow-2xl hover:shadow-pink-600/50 transition">
-                أضف للسلة
-              </button>
+        <div @click="openProduct(p)" class="group cursor-pointer">
+          <div class="relative overflow-hidden rounded-2xl aspect-square">
+            <img :src="p.image" class="w-full h-full object-cover group-hover:scale-110 transition duration-700">
+            <div class="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition"></div>
+            <div class="absolute bottom-4 left-4 right-4 opacity-0 group-hover:opacity-100 transition">
+              <h3 class="text-2xl font-bold" x-text="p.name"></h3>
+              <p class="text-3xl font-black gradient-text" x-text="p.price.toLocaleString() + ' DA'"></p>
             </div>
           </div>
         </div>
@@ -57,74 +37,68 @@
     </div>
   </main>
 
-  <!-- سلة التسوق + Checkout (نفس اللي قبل بس أجمل) -->
-  <div x-show="cartOpen" class="fixed inset-0 z-50" x-transition>
-    <div @click="cartOpen = false" class="absolute inset-0 bg-black/90"></div>
-    <div class="absolute left-0 top-0 h-full w-full max-w-md glass p-8 overflow-y-auto">
-      <h2 class="text-3xl font-bold mb-6 text-center">سلة التسوق</h2>
-      <template x-for="item in cart">
-        <div class="flex gap-4 mb-6 glass p-4 rounded-2xl">
-          <img :src="item.image" class="w-24 h-24 object-cover rounded-xl">
-          <div class="flex-1">
-            <h4 class="font-bold" x-text="item.name"></h4>
-            <p class="text-pink-400 text-xl" x-text="item.price.toLocaleString() + ' ريال'"></p>
-          </div>
-          <button @click="removeFromCart(item.id)" class="text-red-500 text-2xl">×</button>
-        </div>
-      </template>
-      <div class="mt-10 border-t border-gray-700 pt-6">
-        <div class="text-3xl font-black mb-8 text-center">الإجمالي: <span class="gradient-text" x-text="total().toLocaleString() + ' ريال'"></span></div>
-        <button @click="checkoutOpen = true" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 py-5 rounded-full text-xl font-bold">إتمام الطلب</button>
+  <!-- نافذة المنتج + Checkout -->
+  <div x-show="selected" x-transition class="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4" @click.self="selected = null">
+    <div class="bg-zinc-900 rounded-3xl max-w-md w-full overflow-hidden">
+      <img :src="selected.image" class="w-full h-96 object-cover">
+      <div class="p-6">
+        <h2 class="text-3xl font-bold mb-2" x-text="selected.name"></h2>
+        <p class="text-4xl font-black gradient-text mb-8" x-text="selected.price.toLocaleString() + ' DA'"></p>
+        
+        <form @submit.prevent="sendOrder" class="space-y-5">
+          <input x-model="form.name" placeholder="الاسم الكامل" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
+          <input x-model="form.phone" placeholder="رقم الهاتف" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
+          <select x-model="form.wilaya" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
+            <option value="" disabled>اختر الولاية</option>
+            <option>الجزائر</option>
+            <option>وهران</option>
+            <option>قسنطينة</option>
+            <!-- أضف باقي الولايات إذا تبي -->
+          </select>
+          <input x-model="form.address" placeholder="العنوان بالتفصيل" required class="w-full bg-zinc-800 rounded-xl px-5 py-4 text-lg">
+          
+          <button type="submit" class="w-full bg-gradient-to-r from-pink-600 to-yellow-500 py-5 rounded-xl text-xl font-bold">
+            أرسل الطلب عبر تليجرام
+          </button>
+        </form>
       </div>
-    </div>
-  </div>
-
-  <!-- Checkout -->
-  <div x-show="checkoutOpen" class="fixed inset-0 z-50 flex items-center justify-center" x-transition>
-    <div @click="checkoutOpen = false" class="absolute inset-0 bg-black/95"></div>
-    <div class="glass p-10 rounded-3xl max-w-md w-full mx-6">
-      <h2 class="text-4xl font-bold text-center mb-10">إتمام الطلب</h2>
-      <form @submit.prevent="sendOrder">
-        <input x-model="client.name" placeholder="الاسم الكامل" required class="w-full glass p-5 rounded-xl mb-5 text-lg">
-        <input x-model="client.phone" placeholder="رقم الجوال" required class="w-full glass p-5 rounded-xl mb-5 text-lg">
-        <textarea x-model="client.address" placeholder="العنوان بالتفصيل + المدينة" required rows="3" class="w-full glass p-5 rounded-xl mb-8 text-lg"></textarea>
-        <button type="submit" class="w-full bg-gradient-to-r from-green-500 to-emerald-600 py-6 rounded-full text-2xl font-bold">إرسال الطلب عبر تلجرام</button>
-      </form>
     </div>
   </div>
 
 <script>
 function shop() {
   return {
-    products: [], loading: true, cart: [], cartOpen: false, checkoutOpen: false,
-    client: { name: '', phone: '', address: '' },
+    products: [], selected: null,
+    form: { name: '', phone: '', wilaya: '', address: '' },
 
     async loadProducts() {
-      this.loading = true;
       try {
-        const res = await fetch('products.json?t=' + Date.now());
-        this.products = await res.json();
-      } catch(e) { this.products = []; }
-      this.loading = false;
+        const r = await fetch('products.json?t=' + Date.now());
+        this.products = await r.json();
+      } catch(e) {}
     },
 
-    addToCart(p) { this.cart.push({...p}); this.cartOpen = true; },
-    removeFromCart(id) { this.cart = this.cart.filter(x => x.id !== id); },
-    total() { return this.cart.reduce((s,i) => s + i.price, 0); },
+    openProduct(p) { this.selected = p; },
 
     async sendOrder() {
-      const text = `طلب جديد من ZynoXx Store!\n\nالاسم: \( {this.client.name}\nالجوال: \){this.client.phone}\nالعنوان: ${this.client.address}\n\nالمنتجات:\n` +
-        this.cart.map(i => `• \( {i.name} - \){i.price.toLocaleString()} ريال`).join('\n') +
-        `\n\nالإجمالي: \( {this.total().toLocaleString()} ريال\nالتاريخ: \){new Date().toLocaleString('ar-SA')}`;
+      const text = `طلب جديد - ZynoXx Store\n\n` +
+        `المنتج: ${this.selected.name}\n` +
+        `السعر: ${this.selected.price.toLocaleString()} DA\n\n` +
+        `الاسم: ${this.form.name}\n` +
+        `الهاتف: ${this.form.phone}\n` +
+        `الولاية: ${this.form.wilaya}\n` +
+        `العنوان: ${this.form.address}\n\n` +
+        `التاريخ: ${new Date().toLocaleString('ar-DZ')}`;
 
       await fetch(`https://api.telegram.org/bot7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk/sendMessage`, {
-        method: 'POST', headers: {'Content-Type': 'application/json'},
-        body: JSON.stringify({ chat_id: 6497254308, text: text })
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ chat_id: 6497254308, text })
       });
 
-      alert("تم الطلب بنجاح! سنتواصل معك خلال دقائق");
-      this.cart = []; this.checkoutOpen = false; this.cartOpen = false;
-      this.client = { name: '', phone: '', address: '' };
+      alert("تم إرسال طلبك بنجاح! سنتواصل معك قريبًا");
+      this.selected = null;
+      this.form = { name: '', phone: '', wilaya: '', address: '' };
     }
   }
 }
