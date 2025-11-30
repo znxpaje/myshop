@@ -3,220 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZynoXx Store - منتج حصري</title>
+  <title>ZynoXx Store</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
   <style>
-    body { font-family: 'Cairo', sans-serif; background: #F8FAFC; color: #000; }
-    .purple-theme { background: linear-gradient(135deg, #A78BFA, #C4B5FD); }
-    .product-image { transition: transform 0.3s ease; }
-    .product-image:hover { transform: scale(1.05); }
-    .variant-select { border: 1px solid #E2E8F0; border-radius: 8px; padding: 12px; font-size: 16px; }
-    .price-old { text-decoration: line-through; color: #64748B; }
-    .price-new { font-weight: 700; color: #000; font-size: 1.5rem; }
-    .features-list { list-style: none; padding: 0; }
-    .features-list li { display: flex; align-items: center; margin-bottom: 8px; }
-    .features-list li i { margin-left: 8px; color: #94A3B8; }
-    .no-product { text-align: center; color: #94A3B8; font-style: italic; padding: 40px; }
+    body { font-family: 'Cairo', sans-serif; background: #f8f9fc; }
+    .purple { background: linear-gradient(135deg, #c9a9ff, #e0c3ff); }
+    .img:hover { transform: scale(1.04); transition: 0.3s; }
+    .selectt { border: 1px solid #ddd; border-radius: 12px; padding: 14px; font-size: 16px; background: white; }
   </style>
 </head>
-<body x-data="productStore()" x-init="loadProduct()" class="min-h-screen">
+<body x-data="app()" x-init="load()" class="pb-20">
 
-  <!-- Header بسيط -->
-  <header class="bg-white shadow-sm">
-    <div class="max-w-4xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold text-purple-600">ZynoXx</h1>
-      <button @click="cartOpen = true" class="relative">
-        <i class="fas fa-shopping-bag text-2xl text-gray-600"></i>
-        <span x-show="cart.length > 0" class="absolute -top-2 -left-2 bg-purple-600 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center" x-text="cart.length"></span>
-      </button>
-    </div>
-  </header>
+  <!-- بياناتك كاملة -->
+  <script>
+    const BOT_TOKEN     = "7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk";
+    const CHAT_ID       = "6497254308";
+    const GITHUB_TOKEN  = "ghp_KlP9vXz8mNqRtY7uJ5sL2wF6cH3dA1eF8gH9";
+    const REPO          = "znxpaje/myshop";
+    const BRANCH        = "main";
+    const PRODUCTS_FILE = "products.json";
+  </script>
 
-  <!-- Main Content - مطابق للصور -->
-  <main class="max-w-4xl mx-auto px-4 py-8">
-    <div x-show="product.id" class="space-y-6">
-      
-      <!-- Product Images - كبيرة مع thumbnails -->
-      <div class="bg-white rounded-lg p-4">
-        <img :src="currentImage" :alt="product.name" class="w-full h-96 object-cover rounded-lg product-image cursor-pointer mx-auto" x-show="currentImage">
-        <div x-show="!currentImage" class="w-full h-96 flex items-center justify-center bg-gray-100 rounded-lg">
-          <i class="fas fa-image text-6xl text-gray-400"></i>
-        </div>
-        <template x-if="product.thumbnails && product.thumbnails.length > 0">
-          <div class="flex justify-center space-x-2 mt-4">
-            <template x-for="(thumb, index) in product.thumbnails" :key="index">
-              <img @click="currentImage = thumb" :src="thumb" class="w-20 h-20 object-cover rounded cursor-pointer border-2" :class="{ 'border-purple-600': currentImage === thumb, 'border-gray-300': currentImage !== thumb }">
-            </template>
-          </div>
-        </template>
-      </div>
+  <div class="max-w-lg mx-auto p-4">
 
-      <!-- Product Name -->
-      <div class="text-center">
-        <h2 class="text-2xl font-bold text-purple-700" x-text="product.nameEn || 'baggy pant'"></h2>
-        <h3 class="text-xl font-semibold" x-text="product.nameAr || 'بنتال باجي'"></h3>
-      </div>
-
-      <!-- Price -->
-      <div class="text-center bg-purple-theme text-white py-3 rounded-lg">
-        <span class="price-old" x-text="product.originalPrice + ' ع.م'"></span>
-        <span class="price-new" x-text="product.price + ' ~ 2500'"></span>
-      </div>
-
-      <!-- Variants - dropdowns زي الصور -->
-      <div class="space-y-4 bg-white rounded-lg p-4">
-        <div>
-          <label class="block text-sm font-medium mb-2">اللون (couleur)</label>
-          <select x-model="selectedVariant.color" class="variant-select w-full">
-            <option value="">اختر اللون</option>
-            <template x-for="color in product.variants?.colors" :key="color">
-              <option :value="color" x-text="color"></option>
-            </template>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">الحجم (taille)</label>
-          <select x-model="selectedVariant.size" class="variant-select w-full">
-            <option value="">اختر الحجم</option>
-            <template x-for="size in product.variants?.sizes" :key="size">
-              <option :value="size" x-text="size"></option>
-            </template>
-          </select>
-        </div>
-        <div>
-          <label class="block text-sm font-medium mb-2">الطول (longueur)</label>
-          <select x-model="selectedVariant.length" class="variant-select w-full">
-            <option value="">اختر الطول</option>
-            <template x-for="len in product.variants?.lengths" :key="len">
-              <option :value="len" x-text="len"></option>
-            </template>
-          </select>
-        </div>
-      </div>
-
-      <!-- Features List - مع ✓ و ★ -->
-      <div class="bg-white rounded-lg p-4">
-        <ul class="features-list">
-          <li><i class="fas fa-star text-yellow-500 mr-2"></i><span x-text="product.nameAr"></span></li>
-          <template x-for="feature in product.features" :key="feature">
-            <li><i class="fas fa-check text-gray-500 ml-2"></i><span x-text="feature"></span></li>
+    <!-- الصورة الرئيسية + الثلاث صغيرة -->
+    <template x-if="p">
+      <div class="bg-white rounded-3xl overflow-hidden shadow-lg">
+        <img :src="img" class="w-full h-96 object-cover img">
+        <div class="flex justify-center gap-3 p-3 bg-gray-50">
+          <template x-for="t in thumbs">
+            <img @click="img = t" :src="t" class="w-20 h-20 rounded-lg border-4" :class="img===t?'border-purple-500':'border-gray-300'">
           </template>
-          <li><i class="fas fa-star text-yellow-500 ml-2"></i>الجودة العالية!</li>
+        </div>
+      </div>
+
+      <!-- الاسم -->
+      <div class="text-center my-6">
+        <h1 class="text-3xl font-bold text-purple-700" x-text="en"></h1>
+        <h2 class="text-xl mt-1" x-text="ar"></h2>
+      </div>
+
+      <!-- السعر -->
+      <div class="purple text-white text-center py-4 rounded-2xl text-2xl font-bold">
+        <span class="line-through opacity-75" x-text="old+' ع.م'"></span>
+        <span x-text="price + ' ~ 2500'"></span>
+      </div>
+
+      <!-- الخيارات -->
+      <div class="bg-white rounded-2xl p-5 mt-6 space-y-5">
+        <div>
+          <label class="block mb-2 text-gray-700">Couleur</label>
+          <select x-model="color" class="selectt w-full">
+            <option value="">اختر اللون</option>
+            <template x-for="c in colors"><option x-text="c"></option></template>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-2 text-gray-700">Taille</label>
+          <select x-model="size" class="selectt w-full">
+            <option value="">اختر الحجم</option>
+            <template x-for="s in sizes"><option x-text="s"></option></template>
+          </select>
+        </div>
+        <div>
+          <label class="block mb-2 text-gray-700">Longueur</label>
+          <select x-model="length" class="selectt w-full">
+            <option value="">اختر الطول</option>
+            <template x-for="l in lengths"><option x-text="l"></option></template>
+          </select>
+        </div>
+      </div>
+
+      <!-- الوصف مع النجمات والـ ✓ -->
+      <div class="bg-white rounded-2xl p-5 mt-6">
+        <ul class="space-y-3 text-right">
+          <li class="flex items-center"><i class="fas fa-star text-yellow-500 ml-3"></i> <span x-text="ar"></span></li>
+          <template x-for="f in features">
+            <li class="flex items-center"><i class="fas fa-check text-gray-500 ml-3"></i> <span x-text="f"></span></li>
+          </template>
+          <li class="flex items-center"><i class="fas fa-star text-yellow-500 ml-3"></i> أفضل جودة وسعر في السوق!</li>
         </ul>
       </div>
 
-      <!-- Add to Cart Button -->
-      <button @click="addToCart()" class="w-full purple-theme text-white py-4 rounded-lg font-bold flex items-center justify-center">
-        <i class="fas fa-shopping-bag ml-2"></i>أضف للسلة
+      <!-- زر الإضافة -->
+      <button @click="add()" class="purple w-full mt-8 py-5 rounded-2xl text-white text-xl font-bold flex justify-center items-center">
+        <i class="fas fa-shopping-bag ml-3"></i> أضف للسلة
       </button>
-    </div>
+    </template>
 
-    <!-- No Product Message -->
-    <div x-show="!product.id" class="no-product">
-      <i class="fas fa-box text-6xl mb-4"></i>
-      <p>لا يوجد منتجات حاليًا. أضف واحدًا من التليجرام ليظهر هنا!</p>
-    </div>
-  </main>
-
-  <!-- Cart Modal -->
-  <div x-show="cartOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-transition>
-    <div class="bg-white p-6 rounded-lg max-w-sm w-full mx-4">
-      <h2 class="text-xl font-bold mb-4">السلة</h2>
-      <template x-for="item in cart">
-        <div class="flex justify-between py-2">
-          <span x-text="item.nameAr"></span>
-          <span x-text="item.price + ' DA'"></span>
-        </div>
-      </template>
-      <button @click="checkoutOpen = true" class="w-full purple-theme text-white py-3 rounded mt-4">إتمام الطلب</button>
+    <!-- لو مفيش منتجات -->
+    <div x-show="!p" class="text-center py-20 text-gray-500">
+      <i class="fas fa-box-open text-6xl mb-4"></i>
+      <p class="text-xl">أضف منتج من البوت ليظهر هنا</p>
     </div>
   </div>
 
-  <!-- Checkout with Payment -->
-  <div x-show="checkoutOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-transition>
-    <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4 max-h-96 overflow-y-auto">
-      <h2 class="text-xl font-bold mb-4">إتمام الطلب</h2>
-      <form @submit.prevent="sendOrder">
-        <input x-model="customer.name" placeholder="الاسم" required class="w-full p-3 border rounded mb-4">
-        <input x-model="customer.phone" placeholder="الهاتف" required class="w-full p-3 border rounded mb-4">
-        <select x-model="customer.wilaya" required class="w-full p-3 border rounded mb-4">
-          <option value="">الولاية</option>
-          <option>الجزائر</option>
-          <option>وهران</option>
-          <option>قسنطينة</option>
-          <option>عنابة</option>
-          <option>باتنة</option>
-          <option>سطيف</option>
-          <option>الأغواط</option>
-          <option>تلمسان</option>
-          <option>الجلفة</option>
-        </select>
-        <textarea x-model="customer.address" placeholder="العنوان" required rows="3" class="w-full p-3 border rounded mb-4"></textarea>
-        <div class="mb-4">
-          <label class="block text-sm mb-2">طريقة الدفع</label>
-          <label class="flex items-center mb-2">
-            <input type="radio" value="credit" class="mr-2" checked> بطاقة ائتمان
-          </label>
-          <label class="flex items-center mb-2">
-            <input type="radio" value="paypal" class="mr-2"> PayPal
-          </label>
-          <label class="flex items-center mb-2">
-            <input type="radio" value="apple" class="mr-2"> Apple Pay
-          </label>
-          <label class="flex items-center">
-            <input type="radio" value="google" class="mr-2"> Google Pay
-          </label>
-        </div>
-        <button type="submit" class="w-full purple-theme text-white py-3 rounded font-bold">إرسال الطلب</button>
-      </form>
+  <!-- Checkout -->
+  <div x-show="checkout" class="fixed inset-0 bg-black/70 flex items-center justify-center z-50" @click="checkout=false">
+    <div @click.stop class="bg-white rounded-3xl p-6 max-w-md w-full mx-4">
+      <h2 class="text-2xl font-bold mb-6">إتمام الطلب</h2>
+      <input x-model="name" placeholder="الاسم الكامل" class="w-full p-4 border rounded-xl mb-4">
+      <input x-model="phone" placeholder="رقم الهاتف" class="w-full p-4 border rounded-xl mb-4">
+      <input x-model="wilaya" placeholder="الولاية" class="w-full p-4 border rounded-xl mb-4">
+      <textarea x-model="address" placeholder="العنوان بالتفصيل" rows="3" class="w-full p-4 border rounded-xl mb-6"></textarea>
+      <button @click="send()" class="purple w-full py-4 rounded-xl text-white font-bold">إرسال الطلب عبر التليجرام</button>
     </div>
   </div>
 
 <script>
-function productStore() {
+function app() {
   return {
-    product: { id: null },
-    currentImage: '',
-    cart: [],
-    cartOpen: false,
-    checkoutOpen: false,
-    selectedVariant: { color: '', size: '', length: '' },
-    customer: { name: '', phone: '', wilaya: '', address: '', payment: 'credit' },
+    p:null, img:"", thumbs:[], en:"", ar:"", price:0, old:0, colors:[], sizes:[], lengths:[], features:[],
+    color:"", size:"", length:"", name:"", phone:"", wilaya:"", address:"", checkout:false,
 
-    async loadProduct() {
+    async load() {
       try {
-        const res = await fetch('products.json?t=' + Date.now());
-        const data = await res.json();
-        this.product = data[0] || { id: null };
-        if (this.product.id) this.currentImage = this.product.image || '';
-      } catch(e) {
-        this.product = { id: null };
-      }
+        const r = await fetch('products.json?t='+Date.now());
+        const d = await r.json();
+        if (d[0]) {
+          this.p = d[0];
+          this.img = this.p.image;
+          this.thumbs = this.p.thumbs || [];
+          this.en = this.p.en;
+          this.ar = this.p.ar;
+          this.price = this.p.price;
+          this.old = this.p.old;
+          this.colors = this.p.colors || [];
+          this.sizes = this.p.sizes || [];
+          this.lengths = this.p.lengths || [];
+          this.features = this.p.features || [];
+        }
+      } catch(e) {}
     },
 
-    addToCart() {
-      if (!this.product.id) return alert('لا يوجد منتج');
-      const item = { ...this.product, variant: `\( {this.selectedVariant.color} - \){this.selectedVariant.size} - ${this.selectedVariant.length}` };
-      this.cart.push(item);
-      this.cartOpen = true;
+    add() {
+      if (!this.color || !this.size) return alert("اختر اللون والحجم");
+      this.checkout = true;
     },
 
-    get total() {
-      return this.cart.reduce((sum, item) => sum + item.price, 0);
-    },
-
-    async sendOrder() {
-      const orderText = `طلب جديد!\nمنتج: \( {this.product.nameAr}\nاللون/الحجم: \){this.selectedVariant.color} - \( {this.selectedVariant.size}\nالسعر: \){this.product.price} DA\nالدفع: \( {this.customer.payment}\nالاسم: \){this.customer.name}\nالهاتف: \( {this.customer.phone}\nالولاية: \){this.customer.wilaya}\nالعنوان: ${this.customer.address}`;
-      await fetch('https://api.telegram.org/bot7682143795:AAFPjswfPRavrXeCvTpF0Lhy749w5Yo7cdk/sendMessage', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ chat_id: 6497254308, text: orderText })
+    async send() {
+      const text = `طلب جديد!\nالمنتج: \( {this.ar}\nاللون: \){this.color}\nالحجم: \( {this.size}\nالطول: \){this.length}\nالسعر: \( {this.price} دج\n\nالاسم: \){this.name}\nالهاتف: \( {this.phone}\nالولاية: \){this.wilaya}\nالعنوان: ${this.address}`;
+      await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+        method: "POST",
+        headers: {"Content-Type": "application/json"},
+        body: JSON.stringify({chat_id: CHAT_ID, text: text})
       });
-      alert('تم الإرسال!');
-      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', wilaya: '', address: '', payment: 'credit' };
+      alert("تم الإرسال بنجاح!");
+      this.checkout = false;
+      this.name = this.phone = this.wilaya = this.address = "";
     }
   }
 }
