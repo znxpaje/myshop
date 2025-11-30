@@ -1,16 +1,25 @@
 [
   {
     "id": 1,
-    "name": "بنطال Baggy Jogger حصري",
-    "desc": "بنطال مريح بجيوب مخفية، إصدار محدود",
+    "name": "بنطال Baggy Jogger بجيوب مخفية",
+    "desc": "بنطال مريح مصنوع من القطن العضوي، جيوب مخفية للأمان، تصميم عصري للرياضة والشارع.",
     "price": 8900,
-    "image": "https://files.catbox.moe/9zrn5c.jpg"
-  },
-  {
-    "id": 2,
-    "name": "ZynoXx ꜝあ",
-    "price": 1000000000,
-    "desc": "😌",
-    "image": "https://files.catbox.moe/0bfinv.jpg"
+    "originalPrice": 12000,
+    "discount": 25,
+    "image": "https://files.catbox.moe/9zrn5c.jpg",
+    "thumbnails": [
+      "https://files.catbox.moe/9zrn5c.jpg",
+      "https://images.unsplash.com/photo-1551028719-00167b16eac5?w=400",
+      "https://images.unsplash.com/photo-1622473595413-1e3e6c845a3d?w=400"
+    ],
+    "features": [
+      "قطن عضوي 100%",
+      "جيوب مخفية آمنة",
+      "مريح للرياضة واليومي"
+    ],
+    "variants": {
+      "colors": ["#000000", "#ffffff", "#808080"],
+      "sizes": ["S", "M", "L", "XL"]
+    }
   }
 ]
