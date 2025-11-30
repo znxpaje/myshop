@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>ZynoXx Store - منتجات حصرية</title>
+  <title>ZynoXx Store - منتج حصري</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js" defer></script>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"> <!-- أيقونات كاملة، ما في فارغات -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <style>
     body { font-family: 'Inter', sans-serif; background: #ffffff; color: #000000; }
     .product-image { transition: transform 0.3s ease; }
@@ -15,14 +15,15 @@
     .variant-btn { transition: background-color 0.2s; }
     .variant-btn:hover { background-color: #f3f4f6 !important; }
     .price { font-size: 2rem; font-weight: 700; color: #000; }
+    .no-product { text-align: center; color: #999; font-style: italic; }
   </style>
 </head>
 <body x-data="productStore()" x-init="loadProduct()" class="min-h-screen">
 
-  <!-- Header بسيط مطابق لـ Shopify -->
+  <!-- Header مطابق -->
   <header class="bg-white border-b border-gray-200 shadow-sm">
     <div class="max-w-6xl mx-auto px-4 py-4 flex justify-between items-center">
-      <h1 class="text-xl font-bold text-black"><i class="fas fa-store mr-2"></i>ZynoXx</h1>
+      <h1 class="text-xl font-bold text-black"><i class="fas fa-crown mr-2 text-yellow-500"></i>ZynoXx</h1>
       <nav class="hidden md:flex space-x-8">
         <a href="#" class="text-gray-600 hover:text-black"><i class="fas fa-home mr-1"></i>الرئيسية</a>
         <a href="#" class="text-gray-600 hover:text-black"><i class="fas fa-box mr-1"></i>المنتجات</a>
@@ -35,17 +36,17 @@
     </div>
   </header>
 
-  <!-- Main Product Section - مطابقة للرابط -->
+  <!-- Main Product Section - فارغ لحد ما تضيف من البوت -->
   <main class="max-w-6xl mx-auto px-4 py-12">
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+    <div x-show="product.id" class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
       
-      <!-- Product Images - كبيرة مع zoom -->
+      <!-- Product Images -->
       <div class="space-y-4">
         <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
-          <img :src="currentImage" :alt="product.name" class="w-full h-full object-cover product-image cursor-zoom-in">
+          <img :src="currentImage" :alt="product.name" class="w-full h-full object-cover product-image cursor-zoom-in" x-show="currentImage">
+          <div x-show="!currentImage" class="w-full h-full flex items-center justify-center text-gray-400"><i class="fas fa-image text-4xl"></i></div>
         </div>
-        <!-- Thumbnails -->
-        <template x-if="product.thumbnails">
+        <template x-if="product.thumbnails && product.thumbnails.length > 0">
           <div class="flex space-x-2">
             <template x-for="thumb in product.thumbnails" :key="thumb">
               <img @click="currentImage = thumb" :src="thumb" class="w-20 h-20 object-cover rounded cursor-pointer border-2" :class="{ 'border-black': currentImage === thumb }">
@@ -73,7 +74,7 @@
           </ul>
         </div>
 
-        <!-- Variants (Colors/Sizes) -->
+        <!-- Variants -->
         <template x-if="product.variants">
           <div class="mb-6">
             <label class="block text-sm font-medium mb-2">اللون:</label>
@@ -93,7 +94,7 @@
           </div>
         </template>
 
-        <!-- Add to Cart Buttons -->
+        <!-- Buttons -->
         <div class="space-y-3 mb-8">
           <button @click="addToCart()" class="w-full bg-black text-white py-4 rounded-lg font-semibold hover:bg-gray-800 flex items-center justify-center">
             <i class="fas fa-shopping-cart mr-2"></i>أضف للسلة
@@ -103,12 +104,18 @@
           </button>
         </div>
 
-        <!-- Shipping Info -->
+        <!-- Shipping -->
         <div class="bg-gray-50 p-4 rounded-lg">
           <h3 class="font-semibold mb-2"><i class="fas fa-truck mr-2"></i>الشحن</h3>
           <p class="text-sm text-gray-600">شحن مجاني للطلبات فوق 5000 DA. التوصيل في 3-5 أيام.</p>
         </div>
       </div>
+    </div>
+
+    <!-- رسالة لو فارغ -->
+    <div x-show="!product.id" class="no-product py-20">
+      <i class="fas fa-box-open text-6xl mb-4"></i>
+      <p>لا يوجد منتجات حاليًا. أضف واحدًا من لوحة التحكم في التليجرام ليظهر هنا!</p>
     </div>
   </main>
 
@@ -127,7 +134,7 @@
     </div>
   </div>
 
-  <!-- Checkout Modal -->
+  <!-- Checkout مع طرق الدفع -->
   <div x-show="checkoutOpen" class="fixed inset-0 bg-black/50 flex items-center justify-center z-50" x-transition>
     <div class="bg-white p-6 rounded-lg max-w-md w-full mx-4">
       <h2 class="text-2xl font-bold mb-4"><i class="fas fa-credit-card mr-2"></i>إتمام الطلب</h2>
@@ -141,11 +148,39 @@
           <option>قسنطينة</option>
           <option>عنابة</option>
           <option>باتنة</option>
-          <!-- أضف المزيد إذا تبي -->
+          <option>سطيف</option>
+          <option>الأغواط</option>
+          <option>تلمسان</option>
+          <option>الجلفة</option>
         </select>
         <textarea x-model="customer.address" placeholder="العنوان بالتفصيل" required rows="3" class="w-full p-3 border rounded mb-4"></textarea>
-        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded font-semibold">إرسال عبر تليجرام <i class="fas fa-paper-plane ml-2"></i></button>
+        
+        <!-- طرق الدفع - مطابقة للصفحة الأصلية -->
+        <div class="mb-4">
+          <label class="block text-sm font-medium mb-2">طريقة الدفع:</label>
+          <div class="space-y-2">
+            <label class="flex items-center">
+              <input type="radio" name="payment" value="credit" class="mr-2" checked>
+              <i class="fas fa-credit-card text-2xl mr-2"></i>بطاقة ائتمان / الخصم المباشر
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="payment" value="paypal" class="mr-2">
+              <i class="fab fa-paypal text-2xl mr-2 text-blue-500"></i>PayPal
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="payment" value="apple" class="mr-2">
+              <i class="fab fa-apple-pay text-2xl mr-2 text-black"></i>Apple Pay
+            </label>
+            <label class="flex items-center">
+              <input type="radio" name="payment" value="google" class="mr-2">
+              <i class="fab fa-google-pay text-2xl mr-2 text-green-500"></i>Google Pay
+            </label>
+          </div>
+        </div>
+        
+        <button type="submit" class="w-full bg-green-600 text-white py-3 rounded font-semibold">إرسال الطلب عبر تليجرام <i class="fas fa-paper-plane ml-2"></i></button>
       </form>
+      <p class="text-xs text-gray-500 mt-4 text-center">الدفع آمن 100% - الطلب يصلك على التليجرام للتأكيد</p>
     </div>
   </div>
 
@@ -157,22 +192,22 @@
 <script>
 function productStore() {
   return {
-    product: {},
+    product: { id: null }, // فارغ في البداية
     currentImage: '',
     cart: [],
     cartOpen: false,
     checkoutOpen: false,
     selectedVariant: { color: '', size: '' },
-    customer: { name: '', phone: '', wilaya: '', address: '' },
+    customer: { name: '', phone: '', wilaya: '', address: '', payment: 'credit' },
 
     async loadProduct() {
       try {
         const res = await fetch('products.json?t=' + Date.now());
         const data = await res.json();
-        this.product = data[0] || {}; // افتراضي أول منتج
-        this.currentImage = this.product.image || '';
+        this.product = data[0] || { id: null }; // أول منتج أو فارغ
+        if (this.product.id) this.currentImage = this.product.image || '';
       } catch(e) {
-        console.error(e);
+        this.product = { id: null };
       }
     },
 
@@ -181,6 +216,7 @@ function productStore() {
     },
 
     addToCart() {
+      if (!this.product.id) return alert('لا يوجد منتج');
       if (this.selectedVariant.color || this.selectedVariant.size) {
         const item = { ...this.product, variant: `\( {this.selectedVariant.color || ''} - \){this.selectedVariant.size || ''}` };
         this.cart.push(item);
@@ -200,10 +236,12 @@ function productStore() {
     },
 
     async sendOrder() {
+      if (!this.product.id) return alert('لا يوجد منتج');
       const orderText = `طلب جديد من ZynoXx Store!\n\n` +
         `المنتج: ${this.product.name}\n` +
         `اللون/الحجم: \( {this.selectedVariant.color || ''} - \){this.selectedVariant.size || ''}\n` +
-        `السعر: ${this.product.price} DA\n\n` +
+        `السعر: ${this.product.price} DA\n` +
+        `طريقة الدفع: ${this.customer.payment}\n\n` +
         `الاسم: ${this.customer.name}\n` +
         `الهاتف: ${this.customer.phone}\n` +
         `الولاية: ${this.customer.wilaya}\n` +
@@ -217,7 +255,7 @@ function productStore() {
       });
 
       alert('تم إرسال الطلب بنجاح! سنتواصل معك قريبًا.');
-      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', wilaya: '', address: '' };
+      this.cart = []; this.checkoutOpen = false; this.customer = { name: '', phone: '', wilaya: '', address: '', payment: 'credit' };
     }
   }
 }
